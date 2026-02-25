@@ -1,0 +1,74 @@
+apiVersion: 1.0.0
+metadata:
+  name: windsurf-workspace
+  version: 1.0.0
+  description: Windsurf IDE workspace for OpenShift DevSpaces
+components:
+  - name: windsurf-container
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:3.8
+      mountSources: true
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
+      cpuLimit: 2000m
+      cpuRequest: 1000m
+      endpoints:
+        - name: windsurf
+          targetPort: 8000
+          exposure: public
+          protocol: http
+          secure: false
+          attributes:
+            type: main
+            urlRewriteSupported: true
+      env:
+        - name: WINDSURF_HOME
+          value: /home/user/.windsurf
+        - name: WINDSURF_EXTENSIONS
+          value: /home/user/.windsurf/extensions
+        - name: WINDSURF_SETTINGS
+          value: /home/user/.windsurf/User/settings.json
+      volumeMounts:
+        - name: windsurf-data
+          path: /home/user/.windsurf
+        - name: m2-repo
+          path: /home/user/.m2
+        - name: node-modules
+          path: /home/user/.npm
+  - name: windsurf-data
+    volume:
+      size: 5Gi
+  - name: m2-repo
+    volume:
+      size: 2Gi
+  - name: node-modules
+    volume:
+      size: 1Gi
+commands:
+  - id: install-windsurf
+    exec:
+      component: windsurf-container
+      commandLine: >
+        curl -fsSL https://windsurf-studio.com/install.sh | bash &&
+        export PATH=$PATH:$HOME/.windsurf/bin &&
+        windsurf --version
+      workingDir: ${PROJECTS_ROOT}
+      group:
+        kind: build
+        label: Install Windsurf
+  - id: start-windsurf
+    exec:
+      component: windsurf-container
+      commandLine: >
+        export PATH=$PATH:$HOME/.windsurf/bin &&
+        cd ${PROJECTS_ROOT} &&
+        windsurf server --host 0.0.0.0 --port 8000 --without-connection-token
+      workingDir: ${PROJECTS_ROOT}
+      group:
+        kind: run
+        label: Start Windsurf Server
+events:
+  preStart:
+    - install-windsurf
+  postStart:
+    - start-windsurf
