@@ -55,7 +55,6 @@ commands:
       workingDir: ${PROJECTS_ROOT}
       group:
         kind: build
-        label: Install Windsurf
   - id: start-windsurf
     exec:
       component: windsurf-container
@@ -66,7 +65,6 @@ commands:
       workingDir: ${PROJECTS_ROOT}
       group:
         kind: run
-        label: Start Windsurf Server
 events:
   preStart:
     - install-windsurf
