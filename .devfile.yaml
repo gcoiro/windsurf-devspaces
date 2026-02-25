@@ -46,15 +46,13 @@ components:
       size: 1Gi
 commands:
   - id: install-windsurf
-    exec:
+    apply:
       component: windsurf-container
       commandLine: >
         curl -fsSL https://windsurf-studio.com/install.sh | bash &&
         export PATH=$PATH:$HOME/.windsurf/bin &&
         windsurf --version
       workingDir: ${PROJECTS_ROOT}
-      group:
-        kind: build
   - id: start-windsurf
     exec:
       component: windsurf-container
